@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kd.bysj.stushop.dao.UserMapper" >
+  <resultMap id="BaseResultMap" type="com.kd.bysj.stushop.entity.User" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="user_pwd" property="userPwd" jdbcType="VARCHAR" />
+    <result column="user_tel" property="userTel" jdbcType="VARCHAR" />
+    <result column="user_email" property="userEmail" jdbcType="VARCHAR" />
+    <result column="user_sex" property="userSex" jdbcType="VARCHAR" />
+    <result column="user_regtime" property="userRegtime" jdbcType="TIMESTAMP" />
+    <result column="user_addrid" property="userAddrid" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="AccountLock" type="com.kd.bysj.stushop.entity.UserLock" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="count" property="count" jdbcType="INTEGER" />
+    <result column="user_id" property="user_id" jdbcType="INTEGER" />
+    <result column="lock" property="lock" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="loginCheck" parameterType="com.kd.bysj.stushop.entity.User" resultType="java.lang.Integer">
+    select count(*)
+    from user
+    where user_pwd=#{userPwd,jdbcType=VARCHAR}
+    <if test="userName!=null and userName!=''">
+      and user_name=#{user_name,jdbcType=VARCHAR}
+    </if>
+    <if test="userTel!=null and userTel!=''">
+      and user_tel=#{user_tel,jdbcType=VARCHAR}
+    </if>
+    <if test="userEmail!=null and userEmail!=''">
+      and user_email=#{user_email,jdbcType=VARCHAR}
+    </if>
+  </select>
+  <select id="login" parameterType="com.kd.bysj.stushop.entity.User" resultType="BaseResultMap">
+    select id, user_name, user_pwd, user_tel, user_email, user_sex, user_regtime, user_addrid
+    from user
+    where user_pwd=#{userPwd,jdbcType=VARCHAR}
+    <if test="userName!=null and userName!=''">
+      and user_name=#{user_name,jdbcType=VARCHAR}
+    </if>
+    <if test="userTel!=null and userTel!=''">
+      and user_tel=#{user_tel,jdbcType=VARCHAR}
+    </if>
+    <if test="userEmail!=null and userEmail!=''">
+      and user_email=#{user_email,jdbcType=VARCHAR}
+    </if>
+  </select>
+  <select id="checkAccountLockCount" parameterType="com.kd.bysj.stushop.entity.User" resultType="AccountLock">
+    select l.count,l.user_id,l.lock
+    from user_lock l,
+      (select id
+      from user
+      where
+    <if test="userName!=null and userName!=''">
+      and user_name=#{user_name,jdbcType=VARCHAR}
+    </if>
+    <if test="userTel!=null and userTel!=''">
+      and user_tel=#{user_tel,jdbcType=VARCHAR}
+    </if>
+    <if test="userEmail!=null and userEmail!=''">
+      and user_email=#{user_email,jdbcType=VARCHAR}
+    </if>
+      ) m
+    where l.user_id=m.id
+  </select>
+  <update id="updateCount" parameterType="com.kd.bysj.stushop.entity.UserLock" >
+    update user_lock
+    set count = #{count,jdbcType=INTEGER},
+    where user_id = #{user_id,jdbcType=INTEGER}
+  </update>
+  <update id="lockAccount" parameterType="com.kd.bysj.stushop.entity.UserLock" >
+    UPDATE user_lock
+  	SET lock_time=#{lock_time,jdbcType=VARCHAR},lock=1
+  	WHERE user_id=#{user_id,jdbcType=INTEGER}
+  </update>
+  <select id="getLockTime" resultType="java.lang.String" parameterType="java.lang.Integer" >
+    select lock_time
+    from user_lock
+    where user_id = #{user_id,jdbcType=INTEGER}
+  </select>
+  <update id="unlockAccount" parameterType="java.lang.Integer" >
+    UPDATE user_lock
+  	SET lock=0
+  	WHERE user_id=#{user_id,jdbcType=INTEGER}
+  </update>
+  <insert id="insert" parameterType="com.kd.bysj.stushop.entity.User" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into user (user_name, user_pwd, user_tel,
+    user_email, user_sex, user_regtime,
+    user_addrid)
+    values (#{userName,jdbcType=VARCHAR}, #{userPwd,jdbcType=VARCHAR}, #{userTel,jdbcType=VARCHAR},
+    #{userEmail,jdbcType=VARCHAR}, #{userSex,jdbcType=VARCHAR}, #{userRegtime,jdbcType=TIMESTAMP},
+    #{userAddrid,jdbcType=INTEGER})
+  </insert>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <update id="updateByPrimaryKey" parameterType="com.kd.bysj.stushop.entity.User" >
+    update user
+    set user_name = #{userName,jdbcType=VARCHAR},
+      user_pwd = #{userPwd,jdbcType=VARCHAR},
+      user_tel = #{userTel,jdbcType=VARCHAR},
+      user_email = #{userEmail,jdbcType=VARCHAR},
+      user_sex = #{userSex,jdbcType=VARCHAR},
+      user_regtime = #{userRegtime,jdbcType=TIMESTAMP},
+      user_addrid = #{userAddrid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, user_name, user_pwd, user_tel, user_email, user_sex, user_regtime, user_addrid
+    from user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, user_name, user_pwd, user_tel, user_email, user_sex, user_regtime, user_addrid
+    from user
+  </select>
+
+</mapper>
